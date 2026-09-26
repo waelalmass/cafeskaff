@@ -2,92 +2,453 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAFE SKAFF - Admin</title>
   <style>
-    body {font-family:'Montserrat',sans-serif; background:linear-gradient(135deg,#fad0c4,#ffd1ff); padding:30px;}
-    h1 {color:#c2185b;}
-    form {margin-bottom:20px;}
-    input {padding:10px; margin:5px; border:2px solid #c2185b; border-radius:5px;}
-    button {background:#c2185b; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;}
-    button:hover {background:#880e4f;}
-    ul {list-style:none; padding:0;}
-    li {background:#fff; margin:5px 0; padding:10px; border-radius:5px; display:flex; justify-content:space-between; align-items:center;}
-    .delete-btn {background:#e53935; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;}
-    .delete-btn:hover {background:#b71c1c;}
-    img {max-width:80px; border-radius:5px; margin-right:10px;}
-    .product-info {display:flex; align-items:center; gap:10px;}
-    /* زر الرجوع */
-    .back-btn {
-      margin-top:20px;
-      background:#4caf50;
-      color:#fff;
-      border:none;
-      padding:10px 20px;
-      border-radius:20px;
-      cursor:pointer;
-      font-weight:600;
+    * {
+      box-sizing: border-box;
     }
-    .back-btn:hover {
-      background:#2e7d32;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:
+        linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
+        url('https://coffeeconnection.com.au/cdn/shop/articles/health-benefits-of-cappuccino-coffee-908368.jpg?v=1748601688')
+        center/cover fixed;
+      color: white;
+      min-height: 100vh;
+    }
+    .container {
+      width: 95%;
+      max-width: 1000px;
+      margin: auto;
+      padding: 40px 0;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-box {
+      background: rgba(255,255,255,.12);
+      backdrop-filter: blur(15px);
+      padding: 25px;
+      border-radius: 18px;
+      margin-bottom: 30px;
+    }
+    input,
+    textarea {
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 12px;
+      border: 0;
+      border-radius: 10px;
+      outline: none;
+      font-size: 16px;
+    }
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+    .main-btn {
+      width: 100%;
+      padding: 13px;
+      border: 0;
+      border-radius: 25px;
+      background: white;
+      color: #333;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .cancel-btn {
+      width: 100%;
+      padding: 12px;
+      border: 0;
+      border-radius: 25px;
+      background: #777;
+      color: white;
+      margin-top: 10px;
+      display: none;
+      cursor: pointer;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .product {
+      background: rgba(255,255,255,.13);
+      backdrop-filter: blur(12px);
+      padding: 18px;
+      border-radius: 18px;
+    }
+    .product img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .product h3 {
+      margin-bottom: 5px;
+    }
+    .product-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 15px;
+    }
+    .edit-btn,
+    .delete-btn {
+      flex: 1;
+      padding: 10px;
+      border: 0;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .edit-btn {
+      background: white;
+      color: #333;
+    }
+    .delete-btn {
+      background: #d9534f;
+      color: white;
+    }
+    #status {
+      text-align: center;
+      margin: 15px;
+      min-height: 20px;
+    }
+    .back-btn {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 30px auto;
+      padding: 12px;
+      border: 0;
+      border-radius: 25px;
+      background: #635d5d;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .products {
+        grid-template-columns: 1fr;
+      }
+      .container {
+        width: 92%;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Admin Panel</h1>
-  <form id="productForm">
-    <input type="text" id="productName" placeholder="Product Name" required>
-    <input type="number" id="productPrice" placeholder="Price" required>
-    <input type="text" id="productImage" placeholder="Image URL" required>
-    <button type="submit">Add Product</button>
-  </form>
-
-  <ul id="productList"></ul>
-
-  <!-- زر الرجوع للـ Store -->
-  <button class="back-btn" onclick="goBack()">⬅ Back to Store</button>
-
-  <script>
-    const productForm = document.getElementById('productForm');
-    const productList = document.getElementById('productList');
-    let products = JSON.parse(localStorage.getItem('products')) || [];
-
-    function renderProducts() {
-      productList.innerHTML = '';
-      products.forEach((p, index) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <div class="product-info">
-            <img src="${p.image}" alt="${p.name}">
-            <span>${p.name} - ${p.price}</span>
-          </div>
-          <button class="delete-btn" onclick="deleteProduct(${index})">Delete</button>
-        `;
-        productList.appendChild(li);
-      });
-    }
-
-    function deleteProduct(index) {
-      products.splice(index, 1);
-      localStorage.setItem('products', JSON.stringify(products));
-      renderProducts();
-    }
-
-    productForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('productName').value;
-      const price = document.getElementById('productPrice').value;
-      const image = document.getElementById('productImage').value;
-      products.push({ name, price, image });
-      localStorage.setItem('products', JSON.stringify(products));
-      renderProducts();
-      productForm.reset();
+<div class="container">
+  <h1>☕ CAFE SKAFF ADMIN</h1>
+  <!-- ADD / EDIT FORM -->
+  <div class="form-box">
+    <input
+      id="name"
+      type="text"
+      placeholder="Product name"
+    >
+    <input
+      id="price"
+      type="number"
+      step="0.01"
+      placeholder="Price"
+    >
+    <input
+      id="image"
+      type="url"
+      placeholder="Image URL"
+    >
+    <textarea
+      id="description"
+      placeholder="Product description"
+    ></textarea>
+    <button
+      id="saveBtn"
+      class="main-btn"
+      onclick="saveProduct()"
+    >
+      Add Product
+    </button>
+    <button
+      id="cancelBtn"
+      class="cancel-btn"
+      onclick="cancelEdit()"
+    >
+      Cancel Edit
+    </button>
+  </div>
+  <div id="status"></div>
+  <h2>Products</h2>
+  <div
+    class="products"
+    id="products"
+  ></div>
+  <button
+    class="back-btn"
+    onclick="location.href='index.html'"
+  >
+    ← Back to Store
+  </button>
+</div>
+<script type="module">
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    serverTimestamp,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+  // ==========================================
+  // PUT YOUR FIREBASE CONFIG HERE
+  // ==========================================
+  const firebaseConfig = {
+    apiKey: "PUT_YOUR_API_KEY_HERE",
+    authDomain:
+      "PUT_YOUR_PROJECT.firebaseapp.com",
+    projectId:
+      "PUT_YOUR_PROJECT_ID_HERE",
+    storageBucket:
+      "PUT_YOUR_PROJECT.appspot.com",
+    messagingSenderId:
+      "PUT_YOUR_SENDER_ID_HERE",
+    appId:
+      "PUT_YOUR_APP_ID_HERE"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  // ==========================================
+  // VARIABLES
+  // ==========================================
+  const nameInput =
+    document.getElementById("name");
+  const priceInput =
+    document.getElementById("price");
+  const imageInput =
+    document.getElementById("image");
+  const descriptionInput =
+    document.getElementById("description");
+  const saveBtn =
+    document.getElementById("saveBtn");
+  const cancelBtn =
+    document.getElementById("cancelBtn");
+  const productsDiv =
+    document.getElementById("products");
+  const status =
+    document.getElementById("status");
+  let editingId = null;
+  // ==========================================
+  // LOAD PRODUCTS
+  // ==========================================
+  const productsQuery = query(
+    collection(db, "products"),
+    orderBy("createdAt", "desc")
+  );
+  onSnapshot(productsQuery, (snapshot) => {
+    productsDiv.innerHTML = "";
+    snapshot.forEach((productDoc) => {
+      const p = productDoc.data();
+      const div =
+        document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `
+        ${
+          p.image
+          ? `<img src="${escapeHtml(p.image)}">`
+          : ""
+        }
+        <h3>${escapeHtml(p.name)}</h3>
+        <strong>
+          $${Number(p.price).toFixed(2)}
+        </strong>
+        ${
+          p.description
+          ? `<p>${escapeHtml(p.description)}</p>`
+          : ""
+        }
+        <div class="product-actions">
+          <button
+            class="edit-btn"
+            data-id="${productDoc.id}"
+          >
+            Edit
+          </button>
+          <button
+            class="delete-btn"
+            data-id="${productDoc.id}"
+          >
+            Delete
+          </button>
+        </div>
+      `;
+      // EDIT
+      div
+        .querySelector(".edit-btn")
+        .addEventListener("click", () => {
+          startEdit(
+            productDoc.id,
+            p
+          );
+        });
+      // DELETE
+      div
+        .querySelector(".delete-btn")
+        .addEventListener("click", () => {
+          deleteProduct(
+            productDoc.id,
+            p.name
+          );
+        });
+      productsDiv.appendChild(div);
     });
-
-    function goBack() {
-      window.location.href = "index.html";
+  }, (error) => {
+    status.textContent =
+      "Error loading products.";
+    console.error(error);
+  });
+  // ==========================================
+  // ADD / UPDATE PRODUCT
+  // ==========================================
+  window.saveProduct = async function() {
+    const name =
+      nameInput.value.trim();
+    const price =
+      Number(priceInput.value);
+    const image =
+      imageInput.value.trim();
+    const description =
+      descriptionInput.value.trim();
+    if (!name) {
+      alert("Enter product name.");
+      return;
     }
-
-    renderProducts();
-  </script>
+    if (
+      !priceInput.value ||
+      isNaN(price) ||
+      price < 0
+    ) {
+      alert("Enter a valid price.");
+      return;
+    }
+    try {
+      saveBtn.disabled = true;
+      status.textContent =
+        "Saving...";
+      const data = {
+        name: name,
+        price: price,
+        image: image,
+        description: description
+      };
+      if (editingId) {
+        await updateDoc(
+          doc(db, "products", editingId),
+          data
+        );
+        status.textContent =
+          "Product updated successfully ✓";
+      } else {
+        await addDoc(
+          collection(db, "products"),
+          {
+            ...data,
+            createdAt: serverTimestamp()
+          }
+        );
+        status.textContent =
+          "Product added successfully ✓";
+      }
+      clearForm();
+    } catch (error) {
+      console.error(error);
+      status.textContent =
+        "Error saving product.";
+      alert(error.message);
+    } finally {
+      saveBtn.disabled = false;
+    }
+  };
+  // ==========================================
+  // EDIT
+  // ==========================================
+  function startEdit(id, product) {
+    editingId = id;
+    nameInput.value =
+      product.name || "";
+    priceInput.value =
+      product.price ?? "";
+    imageInput.value =
+      product.image || "";
+    descriptionInput.value =
+      product.description || "";
+    saveBtn.textContent =
+      "Update Product";
+    cancelBtn.style.display =
+      "block";
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+  // ==========================================
+  // DELETE
+  // ==========================================
+  async function deleteProduct(id, name) {
+    const confirmed =
+      confirm(
+        `Delete "${name}"?`
+      );
+    if (!confirmed) return;
+    try {
+      await deleteDoc(
+        doc(db, "products", id)
+      );
+      status.textContent =
+        "Product deleted ✓";
+    } catch (error) {
+      console.error(error);
+      alert(
+        "Could not delete product."
+      );
+    }
+  }
+  // ==========================================
+  // CANCEL EDIT
+  // ==========================================
+  window.cancelEdit = function() {
+    clearForm();
+  };
+  function clearForm() {
+    editingId = null;
+    nameInput.value = "";
+    priceInput.value = "";
+    imageInput.value = "";
+    descriptionInput.value = "";
+    saveBtn.textContent =
+      "Add Product";
+    cancelBtn.style.display =
+      "none";
+  }
+  // ==========================================
+  // ESCAPE HTML
+  // ==========================================
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+</script>
 </body>
 </html>
