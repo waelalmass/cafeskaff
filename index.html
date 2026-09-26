@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LIORA Store</title>
+  <style>
+    body {
+      margin:0;
+      font-family:'Montserrat',sans-serif;
+      background:url('https://coffeeconnection.com.au/cdn/shop/articles/health-benefits-of-cappuccino-coffee-908368.jpg?v=1748601688') no-repeat center center/cover; 
+      color:#fff;
+      }
+    nav {
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%; 
+      display:flex;
+      justify-content:space-between; 
+      align-items:center; 
+      padding:20px 50px;
+      background:rgba(0,0,0,0.5);}
+    nav h1 {
+      text-align: center;
+      font-size:34px;
+      font-weight:600;
+      }
+    nav ul {
+      list-style:none;
+      display:flex;
+      gap:30px;
+      }
+    nav ul li a {
+      text-decoration:none; 
+      color:#fff;
+      font-weight:500;
+      }
+    .admin-btn {
+      padding:8px 15px;
+      border:none; 
+      border-radius:20px;
+      background: #635d5d;
+      color:#fff;
+      font-weight:600;
+      cursor:pointer;
+          }
+    .admin-btn:hover {
+      background:#333;
+      color:#fff;
+      }
+    .hero {
+      height:60vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center; 
+      text-align:center; 
+      padding:0 20px;
+        }
+    .hero h2 {
+      font-size:48px;
+      margin-bottom:20px;
+      }
+    .hero p {
+      font-size:18px;
+      max-width:600px;
+      }
+    .products {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+      gap:30px;
+      padding:50px;
+        }
+    .product {
+      color: #000000;
+      background:rgba(255,255,255,0.1);
+      border-radius:15px; 
+      padding:20px;
+      text-align:center;
+      backdrop-filter:blur(10px);
+        }
+    .product img {
+      width:100%;
+      border-radius:10px;
+      margin-bottom:15px;
+      }
+    .product button {
+      padding:10px 20px;
+      border:none;
+      border-radius:20px;
+      background:#fff;
+      color:#333;
+      font-weight:600;     
+      cursor:pointer;
+      transition:all 0.3s ease;
+          }
+    .product button.added {
+      background:#4caf50;
+      color:#fff;
+      transform:scale(1.1);
+      }
+    .cart {
+      position:fixed;
+      right:20px; 
+      bottom:80px;
+      background:#fff;
+      color:#333;
+      padding:20px;
+      border-radius:15px;
+      max-width:300px;
+      display:none;
+            }
+    .cart h4 {
+      margin-bottom:10px;
+    }
+    .cart ul {
+      list-style:none; 
+      padding:0;
+    }
+    .cart button {
+      margin-top:10px;
+      padding:10px 20px;
+      border:none;
+      border-radius:20px;
+      background:#333;
+      color:#fff;
+      font-weight:600;
+      cursor:pointer;
+            }
+    #toggleCart {
+      position:fixed;
+      right:20px; 
+      bottom:20px;
+      padding:15px 25px;
+      border:none;
+      border-radius:30px;
+      background:#635d5d;
+      color:#fff; 
+      font-weight:600;
+      cursor:pointer;
+            }
+
+
+
+
+      /* تحسين العرض على الموبايل */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    padding: 10px 20px;
+  }
+  nav h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  nav ul {
+    gap: 15px;
+  }
+  .hero h2 {
+    font-size: 28px;
+  }
+  .hero p {
+    font-size: 16px;
+  }
+  .products {
+    grid-template-columns: 1fr; /* منتج واحد بالصف */
+    padding: 20px;
+  }
+  .product {
+    font-size: 16px;
+    padding: 15px;
+  }
+  .cart {
+    max-width: 90%;
+    right: 5%;
+    bottom: 10%;
+    font-size: 16px;
+  }
+  #toggleCart {
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+}
+
+
+
+
+  </style>
+</head>
+<body>
+  <nav>
+    <h1>CAFE SKAFF</h1>
+    <ul>
+      <!-- زر Admin Panel -->
+      <li><button onclick="goAdmin()" class="admin-btn">Admin Panel</button></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    
+  </section>
+
+  <section class="products" id="products"></section>
+
+  <button id="toggleCart">Cart</button>
+
+  <div class="cart" id="cart">
+    <h4>Shopping Cart</h4>
+    <ul id="cart-items"></ul>
+    <p id="total">Total: 0</p>
+    
+  </div>
+
+  <script>
+    let cart = [];
+    const productsDiv = document.getElementById('products');
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+
+    function renderProducts() {
+      productsDiv.innerHTML = '';
+      if(products.length === 0){
+        productsDiv.innerHTML = "<p style='color:white;'>No products available. Please ask Admin to add products.</p>";
+      }
+      products.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'product';
+        div.innerHTML = `
+         
+          <h3>${p.name}</h3>
+          <p>${p.price}</p>
+          <button onclick="addToCart(this,'${p.name}',${p.price})">Add to Cart</button>
+        `;
+        productsDiv.appendChild(div);
+      });
+    }
+
+    function addToCart(btn, product, price) {
+      cart.push({product, price});
+      renderCart();
+      btn.classList.add('added');
+      setTimeout(() => btn.classList.remove('added'), 600);
+    }
+
+    function renderCart() {
+      const cartItems = document.getElementById('cart-items');
+      cartItems.innerHTML = '';
+      let total = 0;
+      cart.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.product} - $${item.price}`;
+        cartItems.appendChild(li);
+        total += item.price;
+      });
+      document.getElementById('total').textContent = `Total: $${total}`;
+    }
+
+    document.getElementById('toggleCart').addEventListener('click', () => {
+      const cartDiv = document.getElementById('cart');
+      cartDiv.style.display = cartDiv.style.display === 'none' ? 'block' : 'none';
+    });
+
+    function orderNow() {
+      let message = "Hello, I want to order:\n";
+      cart.forEach(item => {
+        message += `${item.product} - $${item.price}\n`;
+      });
+      let total = cart.reduce((sum, item) => sum + item.price, 0);
+      message += `Total: $${total}`;
+      let phone = "96170160784"; // ضع رقمك هون
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
+    }
+
+    function goAdmin() {
+      let pass = prompt("Enter Admin Password:");
+      if(pass === "1234"){ // غير كلمة السر هون إذا بدك
+        window.location.href = "admin.html";
+      } else {
+        alert("Wrong password!");
+      }
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>

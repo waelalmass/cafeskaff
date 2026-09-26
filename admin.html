@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <style>
+    body {font-family:'Montserrat',sans-serif; background:linear-gradient(135deg,#fad0c4,#ffd1ff); padding:30px;}
+    h1 {color:#c2185b;}
+    form {margin-bottom:20px;}
+    input {padding:10px; margin:5px; border:2px solid #c2185b; border-radius:5px;}
+    button {background:#c2185b; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;}
+    button:hover {background:#880e4f;}
+    ul {list-style:none; padding:0;}
+    li {background:#fff; margin:5px 0; padding:10px; border-radius:5px; display:flex; justify-content:space-between; align-items:center;}
+    .delete-btn {background:#e53935; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;}
+    .delete-btn:hover {background:#b71c1c;}
+    img {max-width:80px; border-radius:5px; margin-right:10px;}
+    .product-info {display:flex; align-items:center; gap:10px;}
+    /* زر الرجوع */
+    .back-btn {
+      margin-top:20px;
+      background:#4caf50;
+      color:#fff;
+      border:none;
+      padding:10px 20px;
+      border-radius:20px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .back-btn:hover {
+      background:#2e7d32;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+  <form id="productForm">
+    <input type="text" id="productName" placeholder="Product Name" required>
+    <input type="number" id="productPrice" placeholder="Price" required>
+    <input type="text" id="productImage" placeholder="Image URL" required>
+    <button type="submit">Add Product</button>
+  </form>
+
+  <ul id="productList"></ul>
+
+  <!-- زر الرجوع للـ Store -->
+  <button class="back-btn" onclick="goBack()">⬅ Back to Store</button>
+
+  <script>
+    const productForm = document.getElementById('productForm');
+    const productList = document.getElementById('productList');
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+
+    function renderProducts() {
+      productList.innerHTML = '';
+      products.forEach((p, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="product-info">
+            <img src="${p.image}" alt="${p.name}">
+            <span>${p.name} - ${p.price}</span>
+          </div>
+          <button class="delete-btn" onclick="deleteProduct(${index})">Delete</button>
+        `;
+        productList.appendChild(li);
+      });
+    }
+
+    function deleteProduct(index) {
+      products.splice(index, 1);
+      localStorage.setItem('products', JSON.stringify(products));
+      renderProducts();
+    }
+
+    productForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('productName').value;
+      const price = document.getElementById('productPrice').value;
+      const image = document.getElementById('productImage').value;
+      products.push({ name, price, image });
+      localStorage.setItem('products', JSON.stringify(products));
+      renderProducts();
+      productForm.reset();
+    });
+
+    function goBack() {
+      window.location.href = "index.html";
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
